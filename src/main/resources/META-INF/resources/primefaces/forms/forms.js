@@ -43,9 +43,7 @@ PrimeFaces.widget.InputTextarea = PrimeFaces.widget.DeferredWidget.extend({
         
         //Counter
         if(this.cfg.counter) {
-            this.counter = this.cfg.counter ? $(PrimeFaces.escapeClientId(this.cfg.counter)) : null;
-            this.cfg.counterTemplate = this.cfg.counterTemplate||'{0}';
-            this.updateCounter();
+            this.applyCounter();
         }
 
         //maxLength
@@ -84,26 +82,38 @@ PrimeFaces.widget.InputTextarea = PrimeFaces.widget.DeferredWidget.extend({
             }
         });
         
+    },
+
+    applyCounter: function() {
+        var _self = this;
+
+        _self.counter = _self.cfg.counter ? $(PrimeFaces.escapeClientId(_self.cfg.counter)) : null;
+        _self.cfg.counterTemplate = _self.cfg.counterTemplate||'{0}';
         if(_self.counter) {
             this.jq.on('keyup.inputtextarea-counter', function(e) {
                 _self.updateCounter();
             });
         }
+        _self.updateCounter();
     },
+
 
     updateCounter: function() {
         var value = this.normalizeNewlines(this.jq.val()),
         length = value.length;
 
         if(this.counter) {
-            var remaining = this.cfg.maxlength - length;
+            var maxlength = this.cfg.maxlength || 0;
+            var remaining = maxlength - length;
             if(remaining < 0) {
                 remaining = 0;
             }
             
-            var remainingText = this.cfg.counterTemplate.replace('{0}', remaining);
+            var counterText = this.cfg.counterTemplate.replace('{0}', remaining);
+            counterText = counterText.replace('{1}', length);
+            counterText = counterText.replace('{2}', maxlength);
 
-            this.counter.html(remainingText);
+            this.counter.html(counterText);
         }
     },
     
