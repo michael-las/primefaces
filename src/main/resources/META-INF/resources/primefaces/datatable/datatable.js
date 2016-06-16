@@ -1917,13 +1917,16 @@ PrimeFaces.widget.DataTable = PrimeFaces.widget.DeferredWidget.extend({
                             row = element.closest('tr');
                             
                             if(element.hasClass('ui-icon-pencil')) {
+                                $this.disableDrag();
                                 $this.switchToRowEdit(row);
                                 element.hide().siblings().show();
                             }
                             else if(element.hasClass('ui-icon-check')) {
+                                $this.enableDrag();
                                 $this.saveRowEdit(row);
                             }
                             else if(element.hasClass('ui-icon-close')) {
+                                $this.enableDrag();
                                 $this.cancelRowEdit(row);
                             }
                         });
@@ -2812,7 +2815,23 @@ PrimeFaces.widget.DataTable = PrimeFaces.widget.DeferredWidget.extend({
 
         this.orderStateHolder.val(columnIds.join(','));
     },
-    
+   
+    disableDrag: function() {
+        var $this = this;
+
+        if ($this.cfg.draggableRows) {
+            this.tbody.sortable("option", "disabled", true);
+        }
+    },
+
+    enableDrag: function() {
+        var $this = this;
+
+        if ($this.cfg.draggableRows) {
+            this.tbody.sortable("option", "disabled", false);
+        }
+    },
+ 
     makeRowsDraggable: function() {
         var $this = this;
         
@@ -2846,12 +2865,14 @@ PrimeFaces.widget.DataTable = PrimeFaces.widget.DeferredWidget.extend({
                 
                 var options = {
                     source: $this.id,
+                    update: $this.id,
                     process: $this.id,
                     params: [
                         {name: $this.id + '_rowreorder', value: true},
                         {name: $this.id + '_fromIndex', value: fromIndex},
                         {name: $this.id + '_toIndex', value: toIndex},
-                        {name: this.id + '_skipChildren', value: true}
+                        {name: this.id + '_skipChildren', value: true},
+                        {name: $this.id + '_encodeFeature', value: true}
                     ]
                 }
                 

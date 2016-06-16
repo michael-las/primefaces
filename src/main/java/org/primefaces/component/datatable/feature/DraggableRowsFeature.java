@@ -33,7 +33,7 @@ public class DraggableRowsFeature implements DataTableFeature {
     }
 
     public boolean shouldEncode(FacesContext context, DataTable table) {
-        return false;
+        return context.getExternalContext().getRequestParameterMap().containsKey(table.getClientId(context) + "_rowreorder");
     }
 
     public void decode(FacesContext context, DataTable table) {
@@ -61,7 +61,21 @@ public class DraggableRowsFeature implements DataTableFeature {
     }
 
     public void encode(FacesContext context, DataTableRenderer renderer, DataTable table) throws IOException {
-        throw new RuntimeException("DraggableRows Feature should not encode.");
-    }
+        LOGGER.info("Encoding draggable columns");
+        Map<String,String> params = context.getExternalContext().getRequestParameterMap();
+        String clientId = table.getClientId(context);
+        int fromIndex = Integer.parseInt(params.get(clientId + "_fromIndex"));
+        int toIndex = Integer.parseInt(params.get(clientId + "_toIndex"));
+        if (fromIndex > toIndex) {
+            int tmp = fromIndex;
+            fromIndex = toIndex;
+            toIndex = tmp;
+        }
+
+        for (int i = fromIndex; i <= toIndex; i++) {
+            table.setRowIndex(i);
+            renderer.encodeRow(context, table, clientId, i);
+        } 
+     }
     
 }
